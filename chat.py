@@ -53,7 +53,7 @@ def extract_response(stream_data):
     """ Given a stream data as an iterator of lines, extract the final response """
     lines = [line.decode('utf-8').strip() for line in list(stream_data) if line]
     json_formatted = json.loads(lines[-2][len(STREAM_PREFIX):])
-    print(json_formatted["message"]["content"]["parts"][0])
+    return json_formatted["message"]["content"]["parts"][0]
 
 def main():
     parser = argparse.ArgumentParser(description='Send a prompt to OpenAI\'s chat API')
@@ -72,7 +72,10 @@ def main():
         http.client.HTTPConnection.debuglevel = 1
 
     r = requests.post(API_CONVERSATION, json=create_post_payload(args.prompt), stream=True, headers=headers)
-    extract_response(r.iter_lines(delimiter=b'\n'))
+    answer = extract_response(r.iter_lines(delimiter=b'\n'))
+    print("\n")
+    print(answer)
+    print("\n")
 
 if __name__ == "__main__":
     main()
