@@ -26,7 +26,7 @@ headers = {
     'accept-language': 'en-US,en;q=0.9',
     'authority': "chat.openai.com",
     'accept': 'text/event-stream',
-    'authorization': OPENAI_TOKEN
+    'authorization': f'Bearer {OPENAI_TOKEN}'
 }
 
 def create_post_payload(prompt):

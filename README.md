@@ -25,6 +25,7 @@ optional arguments:
 
 Example
 ```
+$ export OPENAI_TOKEN="<your_token>"
 $ python3 chat.py -p "Write a cover letter for an Android Developer role at Microsoft"
 
 Dear Hiring Manager,
@@ -42,9 +43,24 @@ Sincerely,
 [Your Name]
 ```
 
+## API Token
+
+In order to use the script you need to obtain a authentication token and export it as environment variable (`OPENAI_TOKEN`).
+
+A simple way of retrieving one is to:
+- Login in https://chat.openai.com and use Chrome Dev Tools pressing `F12`
+- In the Dev Tools filter by `Fetch/XHR`
+- Find the network call called `session` and go to the `Response` tab
+- Scroll in the response to the last field called `accessToken` and copy the value
+- Export it as a environment variable like `export OPENAI_TOKEN="<the token you copied>"`
+
+
+<img src="images/openai_token.png" width="750"/>
+
+
 ## Notes
 
-This is a small wrapper to play around with chat.openai.com from a python script. It's meant to be for fun and prototyping, so I wouldn't recommend using it in any production application.
+This is a small wrapper to play around with https://chat.openai.com from a python script. It's meant to be for fun and prototyping, so I wouldn't recommend using it in any production application.
 
 For now the script doesnt allow token refreshing, so every now and then you might need to update it.
 
