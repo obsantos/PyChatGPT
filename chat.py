@@ -29,6 +29,14 @@ headers = {
     'authorization': f'Bearer {OPENAI_TOKEN}'
 }
 
+def create_answer_json_response(answer, error, cause):
+    """ Creates the json response for the conversation answer """
+    return {
+        "error": error,
+        "cause": cause,
+        "answer": answer
+    }
+
 def create_post_payload(prompt):
     """ Creates a payload for OpenAI chat api given a prompt """
     return {
@@ -55,10 +63,17 @@ def extract_response(stream_data):
     json_formatted = json.loads(lines[-2][len(STREAM_PREFIX):])
     return json_formatted["message"]["content"]["parts"][0]
 
-def request_answer(prompt):
-    """ Given a prompt, requests the OpenAI api for an answer and returns it """
-    r = requests.post(API_CONVERSATION, json=create_post_payload(prompt), stream=True, headers=headers)
-    return extract_response(r.iter_lines(delimiter=b'\n'))
+def request_answer_as_json(prompt):
+    """ Given a prompt, requests the OpenAI api for an answer and returns it as a json object """
+    try:
+        r = requests.post(API_CONVERSATION, json=create_post_payload(prompt), stream=True, headers=headers)
+        r.raise_for_status()
+        answer = extract_response(r.iter_lines(delimiter=b'\n'))
+        return json.dumps(create_answer_json_response(answer, False, ""))
+    except (requests.exceptions.HTTPError, IndexError) as e:
+        return json.dumps(create_answer_json_response("Error", True, str(e)))
+    except KeyError as e:
+        return json.dumps(create_answer_json_response("Error", True, f"Key: {str(e)} not found."))
 
 def main():
     parser = argparse.ArgumentParser(description='Send a prompt to OpenAI\'s chat API')
@@ -76,9 +91,9 @@ def main():
         logger.addHandler(logging.StreamHandler())
         http.client.HTTPConnection.debuglevel = 1
 
-    answer = request_answer(args.prompt)
+    answer = request_answer_as_json(args.prompt)
     print("\n")
-    print(answer)
+    print(answer if args.debug else json.loads(answer)['answer'])
     print("\n")
 
 if __name__ == "__main__":
