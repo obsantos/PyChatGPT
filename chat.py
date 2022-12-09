@@ -55,6 +55,11 @@ def extract_response(stream_data):
     json_formatted = json.loads(lines[-2][len(STREAM_PREFIX):])
     return json_formatted["message"]["content"]["parts"][0]
 
+def request_answer(prompt):
+    """ Given a prompt, requests the OpenAI api for an answer and returns it """
+    r = requests.post(API_CONVERSATION, json=create_post_payload(prompt), stream=True, headers=headers)
+    return extract_response(r.iter_lines(delimiter=b'\n'))
+
 def main():
     parser = argparse.ArgumentParser(description='Send a prompt to OpenAI\'s chat API')
     parser.add_argument('-p', '--prompt', help='Prompt for the AI', type=str, required=True)
@@ -71,8 +76,7 @@ def main():
         logger.addHandler(logging.StreamHandler())
         http.client.HTTPConnection.debuglevel = 1
 
-    r = requests.post(API_CONVERSATION, json=create_post_payload(args.prompt), stream=True, headers=headers)
-    answer = extract_response(r.iter_lines(delimiter=b'\n'))
+    answer = request_answer(args.prompt)
     print("\n")
     print(answer)
     print("\n")
