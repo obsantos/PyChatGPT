@@ -71,9 +71,9 @@ def request_answer_as_json(prompt):
         answer = extract_response(r.iter_lines(delimiter=b'\n'))
         return json.dumps(create_answer_json_response(answer, False, ""))
     except (requests.exceptions.HTTPError, IndexError) as e:
-        return json.dumps(create_answer_json_response("Error", True, str(e)))
+        return json.dumps(create_answer_json_response("Error. Use --debug for more details", True, str(e)))
     except KeyError as e:
-        return json.dumps(create_answer_json_response("Error", True, f"Key: {str(e)} not found."))
+        return json.dumps(create_answer_json_response("Error. Use --debug for more details", True, f"Key: {str(e)} not found."))
 
 def main():
     parser = argparse.ArgumentParser(description='Send a prompt to OpenAI\'s chat API')
@@ -92,9 +92,7 @@ def main():
         http.client.HTTPConnection.debuglevel = 1
 
     answer = request_answer_as_json(args.prompt)
-    print("\n")
     print(answer if args.debug else json.loads(answer)['answer'])
-    print("\n")
 
 if __name__ == "__main__":
     main()
