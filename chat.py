@@ -15,18 +15,21 @@ import json
 import uuid
 
 OPENAI_TOKEN = environ.get('OPENAI_TOKEN')
+CF_CLEARANCE_COOKIE = environ.get('CF_CLEARANCE_COOKIE')
+CF_BM_COOKIE = environ.get('CF_BM_COOKIE')
 API_CONVERSATION = "https://chat.openai.com/backend-api/conversation"
 STREAM_PREFIX = "data: "
 
 headers = {
-    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.106 Safari/537.36',
+    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
     'origin': 'https://chat.openai.com',
     'referer': 'https://chat.openai.com/chat',
     'content-type': 'application/json',
     'accept-language': 'en-US,en;q=0.9',
     'authority': "chat.openai.com",
     'accept': 'text/event-stream',
-    'authorization': f'Bearer {OPENAI_TOKEN}'
+    'authorization': f'Bearer {OPENAI_TOKEN}',
+    'Cookie': f'__cf_bm={CF_BM_COOKIE}; cf_clearance={CF_CLEARANCE_COOKIE}'
 }
 
 def create_answer_json_response(answer, error, cause):
