@@ -7,6 +7,7 @@
 '''
 
 from os import environ
+from flask import Flask, request, jsonify
 import http.client
 import sys, argparse
 import logging
@@ -19,6 +20,9 @@ CF_CLEARANCE_COOKIE = environ.get('CF_CLEARANCE_COOKIE')
 CF_BM_COOKIE = environ.get('CF_BM_COOKIE')
 API_CONVERSATION = "https://chat.openai.com/backend-api/conversation"
 STREAM_PREFIX = "data: "
+
+app = Flask(__name__)
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 headers = {
     'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36',
@@ -78,15 +82,26 @@ def request_answer_as_json(prompt):
     except KeyError as e:
         return json.dumps(create_answer_json_response("Error. Use --debug for more details", True, f"Key: {str(e)} not found."))
 
+@app.route('/prompt', methods = ['POST'])
+def prompt():
+    """ Server endpoint to respond to prompts """
+    payload = request.get_json()
+    prompt = payload.get('prompt')
+    if not prompt:
+        return {
+            'error': "Must provide a prompt"
+        }
+
+    answer = request_answer_as_json(prompt)
+    return jsonify(json.loads(answer))
+
 def main():
     parser = argparse.ArgumentParser(description='Send a prompt to OpenAI\'s chat API')
-    parser.add_argument('-p', '--prompt', help='Prompt for the AI', type=str, required=True)
     parser.add_argument('-d', '--debug', help='Executes in debug mode with more logs', action='store_true', required=False)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('-p', '--prompt', help='Prompt for the AI', type=str, required=False)
+    group.add_argument('-s', '--server', help='Starts server to respond prompt requests', action='store_true', required=False)
     args = parser.parse_args()
-
-    if not args.prompt:
-        parser.print_help()
-        sys.exit(1)
 
     if args.debug:
         logger = logging.getLogger()
@@ -94,8 +109,11 @@ def main():
         logger.addHandler(logging.StreamHandler())
         http.client.HTTPConnection.debuglevel = 1
 
-    answer = request_answer_as_json(args.prompt)
-    print(answer if args.debug else json.loads(answer)['answer'])
+    if args.prompt:
+        answer = request_answer_as_json(args.prompt)
+        print(answer if args.debug else json.loads(answer)['answer'])
+    elif args.server:
+        app.run(host='0.0.0.0', port=6000)
 
 if __name__ == "__main__":
     main()
