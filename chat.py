@@ -113,7 +113,8 @@ def main():
         answer = request_answer_as_json(args.prompt)
         print(answer if args.debug else json.loads(answer)['answer'])
     elif args.server:
-        app.run(host='0.0.0.0', port=6000)
+        port = int(environ.get('PYCHAT_PORT', 5000))
+        app.run(host='0.0.0.0', port=port)
 
 if __name__ == "__main__":
     main()
