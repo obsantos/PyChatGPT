@@ -90,10 +90,14 @@ def prompt():
     if not prompt:
         return {
             'error': "Must provide a prompt"
-        }
+        }, 400
 
-    answer = request_answer_as_json(prompt)
-    return jsonify(json.loads(answer))
+    answer = json.loads(request_answer_as_json(prompt))
+
+    if answer['error']:
+        return answer, 503
+    else:
+        return answer, 200
 
 def main():
     parser = argparse.ArgumentParser(description='Send a prompt to OpenAI\'s chat API')
