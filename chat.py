@@ -7,9 +7,10 @@
 '''
 
 from os import environ
-from flask import Flask, request, jsonify
+from flask import Flask, request
+from flask_cors import CORS
 import http.client
-import sys, argparse
+import argparse
 import logging
 import requests
 import json
@@ -22,6 +23,7 @@ API_CONVERSATION = "https://chat.openai.com/backend-api/conversation"
 STREAM_PREFIX = "data: "
 
 app = Flask(__name__)
+CORS(app)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
 headers = {
